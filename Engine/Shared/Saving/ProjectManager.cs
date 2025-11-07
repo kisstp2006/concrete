@@ -7,31 +7,35 @@ public static class ProjectManager
 
     public static string projectRoot => Directory.GetParent(Path.GetFullPath(loadedProjectFilePath)).FullName;
 
-    public static string memoryFilePath = Path.Combine(Path.GetTempPath(), "memory.txt");
-    public static string tempProjectPath = Path.Combine(Path.GetTempPath(), "TempConcreteProject");
+    public static string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+    public static string concreteDataPath = Path.Combine(documentsPath, "Concrete");
+    public static string lastProjectMemoryPath = Path.Combine(concreteDataPath, "LastProject.txt");
+    public static string tempProjectPath = Path.Combine(concreteDataPath, "TempProject");
 
     public static void TryLoadLastProjectOrCreateTempProject()
     {
-        if (File.Exists(memoryFilePath))
+        if (File.Exists(lastProjectMemoryPath))
         {
-            Debug.Log("Memory file found.");
+            Debug.Log("Last project memory file found.");
             
-            string memoryProjectPath = File.ReadAllText(memoryFilePath);
+            string lastOpenedProjectPath = File.ReadAllText(lastProjectMemoryPath);
             
-            if (File.Exists(memoryProjectPath))
+            if (File.Exists(lastOpenedProjectPath))
             {
-                Debug.Log("Memory file contained a valid project.");
-                LoadProjectFile(memoryProjectPath);
+                Debug.Log("Last project memory file contained a valid project.");
+                LoadProjectFile(lastOpenedProjectPath);
             }
             else
             {
-                Debug.Log("Memory file did not contain a valid project.");
+                Debug.Log("Last project memory file did not contain a valid project.");
+                File.Delete(lastProjectMemoryPath);
+                Debug.Log("Invalid last project memory file deleted.");
                 CreateAndLoadTempProject();
             }
         }
         else
         {
-            Debug.Log("No memory file found.");
+            Debug.Log("No last project memory file found.");
             CreateAndLoadTempProject();
         }
     }
@@ -84,8 +88,8 @@ public static class ProjectManager
         if (!isTemp)
         {
             // remember project
-            if (File.Exists(memoryFilePath)) File.Delete(memoryFilePath);
-            File.WriteAllText(memoryFilePath, path);
+            if (File.Exists(lastProjectMemoryPath)) File.Delete(lastProjectMemoryPath);
+            File.WriteAllText(lastProjectMemoryPath, path);
             Debug.Log("Remembered the newly loaded project.");
         }
 
@@ -144,8 +148,8 @@ public static class ProjectManager
         if (!isTemp)
         {
             // remember project
-            if (File.Exists(memoryFilePath)) File.Delete(memoryFilePath);
-            File.WriteAllText(memoryFilePath, filepath);
+            if (File.Exists(lastProjectMemoryPath)) File.Delete(lastProjectMemoryPath);
+            File.WriteAllText(lastProjectMemoryPath, filepath);
             Debug.Log("Remembered the newly loaded project.");
         }
 
