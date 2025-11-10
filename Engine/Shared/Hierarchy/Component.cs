@@ -4,7 +4,7 @@ namespace Concrete;
 
 public class Component : IDisposable
 {
-    [Include] public GameObject gameObject;
+    [SerializeMember] public GameObject gameObject;
 
     public virtual void Start()
     {

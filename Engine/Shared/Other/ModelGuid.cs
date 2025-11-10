@@ -2,7 +2,7 @@ namespace Concrete;
 
 public class ModelGuid
 {
-    [Include] public Guid guid;
+    [SerializeMember] public Guid guid;
 
     public ModelGuid()
     {

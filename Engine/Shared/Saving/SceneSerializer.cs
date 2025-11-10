@@ -1,4 +1,6 @@
-global using Ceras;
+global using SerializeMember = Ceras.IncludeAttribute;
+
+using Ceras;
 
 namespace Concrete;
 

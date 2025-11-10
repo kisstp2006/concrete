@@ -2,7 +2,7 @@ namespace Concrete;
 
 public class GameObjectGuid
 {
-    [Include] public Guid guid;
+    [SerializeMember] public Guid guid;
 
     public GameObjectGuid()
     {

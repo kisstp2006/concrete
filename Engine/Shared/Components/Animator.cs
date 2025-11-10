@@ -4,7 +4,7 @@ namespace Concrete;
 
 public class Animator : Component
 {
-    [Include] [Show("playOnAwake")] public bool playOnAwake = false;
+    [SerializeMember] [Show("playOnAwake")] public bool playOnAwake = false;
 
     private bool playing = false;
     private bool looping = false;

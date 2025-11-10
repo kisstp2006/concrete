@@ -19,7 +19,7 @@ public class Transform : Component
     private readonly float toDegrees = 180.0f / MathF.PI;
     private readonly float toRadians = MathF.PI / 180.0f;
 
-    [Include]
+    [SerializeMember]
     public Transform parent
     {
         get => currentParent;
@@ -35,7 +35,7 @@ public class Transform : Component
         }
     }
 
-    [Include] [Show("position")]
+    [SerializeMember] [Show("position")]
     public Vector3 localPosition
     {
         get => currentLocalPosition;
@@ -76,7 +76,7 @@ public class Transform : Component
         }
     }
 
-    [Include] [Show("rotation")]
+    [SerializeMember] [Show("rotation")]
     public Vector3 localEulerAngles
     {
         get => currentLocalEulerAngles;
@@ -99,7 +99,7 @@ public class Transform : Component
         }
     }
 
-    [Include] [Show("scale")]
+    [SerializeMember] [Show("scale")]
     public Vector3 localScale
     {
         get => currentLocalScale;

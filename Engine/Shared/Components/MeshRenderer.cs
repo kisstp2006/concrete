@@ -14,7 +14,7 @@ public class MeshRenderer : Component
 
     public ArmatureInstance AnimationArmature => instance.Armature;
 
-    [Show] [Include]
+    [Show] [SerializeMember]
     public ModelGuid model
     {
         get => currentModel;
