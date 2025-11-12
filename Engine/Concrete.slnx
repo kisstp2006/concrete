@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Editor/Editor.csproj" />
+  <Project Path="Player/Player.csproj" />
+  <Project Path="Shared/Shared.csproj" />
+</Solution>
