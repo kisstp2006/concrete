@@ -32,7 +32,7 @@ public static class Dotnet
 
             <PropertyGroup>
                 <OutputType>library</OutputType>
-                <TargetFramework>net9.0</TargetFramework>
+                <TargetFramework>net10.0</TargetFramework>
                 <ImplicitUsings>enable</ImplicitUsings>
                 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
                 <DebugType>embedded</DebugType>
