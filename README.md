@@ -40,12 +40,12 @@ lightObject.name = "Directional Light";
 <img width="1600" height="900" alt="editor" src="https://github.com/user-attachments/assets/3ba95a9a-f89a-439c-b82a-4b5c0f80b174" />
 
 ## Usage Requirements:
-- The .NET 9 SDK ([Download](https://dotnet.microsoft.com/en-us/download))
+- The .NET 10 SDK ([Download](https://dotnet.microsoft.com/en-us/download))
 - Visual C++ Redistributable ([Download](https://aka.ms/vs/17/release/vc_redist.x64.exe))
 
 ## Building:
 
-Download .NET 9: https://dotnet.microsoft.com/en-us/download
+Download .NET 10: https://dotnet.microsoft.com/en-us/download
 
 Building for Windows:
 
