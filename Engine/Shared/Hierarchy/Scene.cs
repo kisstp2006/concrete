@@ -4,7 +4,7 @@ namespace Concrete;
 
 public class Scene : IDisposable
 {
-    [SerializeMember] public List<GameObject> gameObjects = [];
+    public List<GameObject> gameObjects = [];
 
     public static Scene Current => SceneManager.GetLoadedScene();
 

@@ -73,6 +73,9 @@ public static class ProjectManager
         // initialize asset database
         AssetDatabase.Rebuild();
 
+        // compile scripts
+        ScriptManager.RecompileScripts(projectRoot);
+
         // try to load startup scene
         if (loadedProjectData.firstScene != "")
         {
@@ -132,6 +135,9 @@ public static class ProjectManager
 
         // initialize asset database
         AssetDatabase.Rebuild();
+
+        // compile scripts
+        ScriptManager.RecompileScripts(projectRoot);
 
         // try to load startup scene
         if (loadedProjectData.firstScene != "")

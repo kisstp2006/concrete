@@ -1,4 +1,5 @@
-global using SerializeMember = Ceras.IncludeAttribute;
+global using Serialize = Ceras.IncludeAttribute;
+global using DontSerialize = Ceras.ExcludeAttribute;
 
 using Ceras;
 
@@ -8,7 +9,7 @@ public static class SceneSerializer
 {
     private static SerializerConfig config = new()
     {
-        DefaultTargets = TargetMember.None,
+        DefaultTargets = TargetMember.PublicFields,
     };
 
     public static void SaveScene(string path, Scene scene)

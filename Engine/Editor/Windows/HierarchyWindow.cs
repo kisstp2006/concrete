@@ -58,7 +58,7 @@ public static unsafe class HierarchyWindow
         ImGui.PushID(guid.ToString());
 
         var flags = ImGuiTreeNodeFlags.OpenOnArrow;
-        if (gameObject.transform.children.Count == 0) flags |= ImGuiTreeNodeFlags.Leaf;
+        if (gameObject.transform.Children.Count == 0) flags |= ImGuiTreeNodeFlags.Leaf;
         if (selectedGameObject == gameObject) flags |= ImGuiTreeNodeFlags.Selected;
         bool open = ImGui.TreeNodeEx(gameObject.name, flags);
         if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen()) selectedGameObject = gameObject;
@@ -69,12 +69,12 @@ public static unsafe class HierarchyWindow
         if (dragged_guid != null)
         {
             var dragged = Scene.Current.FindGameObject(dragged_guid.Value);
-            if (dragged != null && !dragged.transform.children.Contains(gameObject.transform)) reparentque.Add((dragged, gameObject));
+            if (dragged != null && !dragged.transform.Children.Contains(gameObject.transform)) reparentque.Add((dragged, gameObject));
         }
 
         if (open)
         {
-            foreach (var child in gameObject.transform.children)
+            foreach (var child in gameObject.transform.Children)
             {
                 DrawHierarchyMember(child.gameObject);
             }

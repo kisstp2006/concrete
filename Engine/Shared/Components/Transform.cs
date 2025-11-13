@@ -5,7 +5,7 @@ namespace Concrete;
 public class Transform : Component
 {
     private Transform currentParent = null;
-    public List<Transform> children = [];
+    private List<Transform> children = [];
 
     private Vector3 currentLocalPosition = Vector3.Zero;
     private Vector3 currentWorldPosition = Vector3.Zero;
@@ -19,7 +19,9 @@ public class Transform : Component
     private readonly float toDegrees = 180.0f / MathF.PI;
     private readonly float toRadians = MathF.PI / 180.0f;
 
-    [SerializeMember]
+    public List<Transform> Children => children;
+
+    [Serialize]
     public Transform parent
     {
         get => currentParent;
@@ -35,7 +37,7 @@ public class Transform : Component
         }
     }
 
-    [SerializeMember] [Show("position")]
+    [Serialize] [Show("position")]
     public Vector3 localPosition
     {
         get => currentLocalPosition;
@@ -76,7 +78,7 @@ public class Transform : Component
         }
     }
 
-    [SerializeMember] [Show("rotation")]
+    [Serialize] [Show("rotation")]
     public Vector3 localEulerAngles
     {
         get => currentLocalEulerAngles;
@@ -99,7 +101,7 @@ public class Transform : Component
         }
     }
 
-    [SerializeMember] [Show("scale")]
+    [Serialize] [Show("scale")]
     public Vector3 localScale
     {
         get => currentLocalScale;

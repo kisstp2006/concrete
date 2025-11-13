@@ -4,8 +4,8 @@ namespace Concrete;
 
 public abstract class Light : Component
 {
-    [SerializeMember] [Show] public float brightness = 1;
-    [SerializeMember] [Show] public Color color = Color.White;
+    [Show] public float brightness = 1;
+    [Show] public Color color = Color.White;
 
     public Light()
     {
@@ -20,7 +20,7 @@ public abstract class Light : Component
 
 public class PointLight : Light
 {
-    [SerializeMember] [Show] public float range = 10;
+    [Show] public float range = 10;
 }
 
 public class DirectionalLight : Light
@@ -30,7 +30,7 @@ public class DirectionalLight : Light
 
 public class SpotLight : Light
 {
-    [SerializeMember] [Show] public float range = 4;
-    [SerializeMember] [Show] public float angle = 30;
-    [SerializeMember] [Show] public float softness = 0.5f;
+    [Show] public float range = 4;
+    [Show] public float angle = 30;
+    [Show] public float softness = 0.5f;
 }

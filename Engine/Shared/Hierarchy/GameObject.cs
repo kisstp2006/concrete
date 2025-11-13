@@ -4,11 +4,11 @@ namespace Concrete;
 
 public class GameObject : IDisposable
 {
-    [SerializeMember] public Guid guid;
-    [SerializeMember] public string name;
-    [SerializeMember] public bool enabled;
-    [SerializeMember] public Transform transform;
-    [SerializeMember] public List<Component> components = [];
+    public Guid guid;
+    public string name;
+    public bool enabled;
+    public Transform transform;
+    public List<Component> components = [];
 
     public GameObject()
     {
