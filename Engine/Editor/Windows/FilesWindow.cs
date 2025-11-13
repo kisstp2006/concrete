@@ -269,7 +269,11 @@ public static unsafe class FilesWindow
                 for (int i = 0; i < dirs.Length; i++)
                 {
                     string name = Path.GetFileName(dirs[i]);
-                    if (!folderRenderExclusions.Contains(name)) RenderDirectoryAndInsides(dirs[i]);
+
+                    bool isHidden = (File.GetAttributes(dirs[i]) & FileAttributes.Hidden) == FileAttributes.Hidden;
+                    bool isExcluded = folderRenderExclusions.Contains(name);
+
+                    if (!isExcluded && !isHidden) RenderDirectoryAndInsides(dirs[i]);
                 }
 
                 string[] files = Directory.GetFiles(currentPath);

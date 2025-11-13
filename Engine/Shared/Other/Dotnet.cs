@@ -37,6 +37,9 @@ public static class Dotnet
                 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
                 <DebugType>embedded</DebugType>
                 <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
+                <BaseOutputPath>.concrete/bin/</BaseOutputPath>
+                <BaseIntermediateOutputPath>.concrete/obj/</BaseIntermediateOutputPath>
+                <RestoreOutputPath>.concrete/obj/</RestoreOutputPath>
             </PropertyGroup>
 
             </Project>
