@@ -205,7 +205,7 @@ public static class ProjectManager
         Dotnet.AddDll(csproj, Path.GetFullPath("Shared.dll"));
 
         // make sure gitignore exists
-        string[] ignores = ["*.csproj", "bin/", "obj/", ".idea/", ".vscode/", ".vs/"];
+        string[] ignores = ["*.csproj", "bin/", "obj/", ".idea/", ".vscode/", ".vs/", ".concrete/"];
         string gitignore_contents = "";
         foreach (var ignore in ignores)
         {
@@ -213,6 +213,7 @@ public static class ProjectManager
             gitignore_contents += last ? ignore : ignore + "\n";
         }
         string gitignore_path = Path.Combine(dir, ".gitignore");
-        if (!File.Exists(gitignore_path)) File.WriteAllText(gitignore_path, gitignore_contents);
+        if (File.Exists(gitignore_path)) File.Delete(gitignore_path);
+        File.WriteAllText(gitignore_path, gitignore_contents);
     }
 }
