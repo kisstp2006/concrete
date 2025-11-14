@@ -198,10 +198,12 @@ public static class ProjectManager
         if (!Directory.Exists(hidden)) Directory.CreateDirectory(hidden);
         new DirectoryInfo(hidden).Attributes |= FileAttributes.Hidden;
 
-        // rebuild shared ref for scripts
+        // rebuild csproj file
         string csproj = Path.Combine(dir, "project.csproj");
         if (File.Exists(csproj)) File.Delete(csproj);
         Dotnet.New(csproj);
+
+        // add the editor's shared assembly as a reference for script autocomplete
         Dotnet.AddDll(csproj, Path.GetFullPath("Shared.dll"));
 
         // make sure gitignore exists
@@ -213,7 +215,6 @@ public static class ProjectManager
             gitignore_contents += last ? ignore : ignore + "\n";
         }
         string gitignore_path = Path.Combine(dir, ".gitignore");
-        if (File.Exists(gitignore_path)) File.Delete(gitignore_path);
-        File.WriteAllText(gitignore_path, gitignore_contents);
+        if (!File.Exists(gitignore_path)) File.WriteAllText(gitignore_path, gitignore_contents);
     }
 }
