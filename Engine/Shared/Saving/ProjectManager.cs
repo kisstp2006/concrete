@@ -201,7 +201,19 @@ public static class ProjectManager
         // rebuild csproj file
         string csproj = Path.Combine(dir, "project.csproj");
         if (File.Exists(csproj)) File.Delete(csproj);
-        Dotnet.New(csproj);
+        string[] properties =
+        [
+            "<OutputType>library</OutputType>",
+            "<TargetFramework>net10.0</TargetFramework>",
+            "<ImplicitUsings>enable</ImplicitUsings>",
+            "<AllowUnsafeBlocks>true</AllowUnsafeBlocks>",
+            "<DebugType>embedded</DebugType>",
+            "<SatelliteResourceLanguages>none</SatelliteResourceLanguages>",
+            "<BaseOutputPath>.concrete/bin/</BaseOutputPath>",
+            "<BaseIntermediateOutputPath>.concrete/obj/</BaseIntermediateOutputPath>",
+            "<RestoreOutputPath>.concrete/obj/</RestoreOutputPath>",
+        ];
+        Dotnet.New(csproj, properties);
 
         // add the editor's shared assembly as a reference for script autocomplete
         Dotnet.AddDll(csproj, Path.GetFullPath("Shared.dll"));

@@ -24,22 +24,16 @@ public static class Dotnet
         if (!string.IsNullOrWhiteSpace(errors)) Debug.Log("Errors: " + errors);
     }
 
-    public static void New(string projectPath)
+    public static void New(string projectPath, string[] properties)
     {
+        string combined_properties = String.Join(Environment.NewLine, properties);
+
         string template = 
-        @"
+        $@"
             <Project Sdk=""Microsoft.NET.Sdk"">
 
             <PropertyGroup>
-                <OutputType>library</OutputType>
-                <TargetFramework>net10.0</TargetFramework>
-                <ImplicitUsings>enable</ImplicitUsings>
-                <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-                <DebugType>embedded</DebugType>
-                <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
-                <BaseOutputPath>.concrete/bin/</BaseOutputPath>
-                <BaseIntermediateOutputPath>.concrete/obj/</BaseIntermediateOutputPath>
-                <RestoreOutputPath>.concrete/obj/</RestoreOutputPath>
+                {combined_properties}
             </PropertyGroup>
 
             </Project>
@@ -48,14 +42,15 @@ public static class Dotnet
         File.WriteAllText(projectPath, template);
     }
 
-    public static void AddDll(string projectPath, string dllPath)
+    public static void AddDll(string csproj, string dll)
     {
         // checks
-        if (!File.Exists(projectPath)) throw new FileNotFoundException($"Project file not found: {projectPath}");
-        if (!File.Exists(dllPath)) throw new FileNotFoundException($"DLL file not found: {dllPath}");
+        if (!File.Exists(csproj)) throw new Exception($"the csproj file was not found: {csproj}");
+        if (!File.Exists(dll)) throw new Exception($"The dll file was not found: {dll}");
 
+        // load existing csproj xml
         var document = new XmlDocument();
-        document.Load(projectPath);
+        document.Load(csproj);
 
         // find or create itemgroup
         XmlNode itemGroup = document.SelectSingleNode("//ItemGroup[Reference]");
@@ -66,20 +61,21 @@ public static class Dotnet
         }
 
         // create <Reference Include="">
-        string referenceName = Path.GetFileNameWithoutExtension(dllPath);
+        string referenceName = Path.GetFileNameWithoutExtension(dll);
         XmlElement reference = document.CreateElement("Reference", document.DocumentElement?.NamespaceURI ?? string.Empty);
         reference.SetAttribute("Include", referenceName);
 
         // create <HintPath>
         XmlElement hintPath = document.CreateElement("HintPath", document.DocumentElement?.NamespaceURI ?? string.Empty);
-        string relativePath = Path.GetRelativePath(Path.GetDirectoryName(projectPath)!, dllPath);
+        string relativePath = Path.GetRelativePath(Path.GetDirectoryName(csproj)!, dll);
         hintPath.InnerText = relativePath;
 
+        // append the new xml
         reference.AppendChild(hintPath);
         itemGroup.AppendChild(reference);
 
         // save
-        document.Save(projectPath);
-        Execute($"build \"{projectPath}\"");
+        document.Save(csproj);
+        Execute($"build \"{csproj}\"");
     }
 }
