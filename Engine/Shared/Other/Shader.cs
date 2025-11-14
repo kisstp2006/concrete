@@ -10,7 +10,7 @@ public class Shader
 
     private uint handle;
 
-    private static string shaderdir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "shaders").ToString();
+    private static string shaderdir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "shaders").ToString();
     private static string GetFullShaderPath(string name) => Path.Combine(shaderdir, name).ToString();
 
     public static Shader CreateDefault() => new Shader(GetFullShaderPath("default.vert"), GetFullShaderPath("default.frag"));

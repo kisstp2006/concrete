@@ -36,8 +36,8 @@ public static unsafe class Editor
         // setup imgui controller and styling
         igcontroller = new ImGuiController(NativeWindow.opengl, NativeWindow.window, NativeWindow.input);
         EditorStyleChanger.ClearFonts();
-        EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "cascadia.ttf"), 18);
-        EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "fontawesome_free_solid.otf"), 18, true);
+        EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "cascadia.ttf"), 18);
+        EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "fontawesome_free_solid.otf"), 18, true);
         EditorStyleChanger.SetupCustomTheme();
         
         ProjectManager.TryLoadLastProjectOrCreateTempProject();

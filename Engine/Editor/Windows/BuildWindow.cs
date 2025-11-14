@@ -97,7 +97,7 @@ public static class BuildWindow
 
         // move game assets to build directory
         SetStatus("Copying game data...");
-        CopyDirectory(ProjectManager.projectRoot, Path.Combine(buildDirectory, "Resources/GameData"));
+        CopyDirectory(ProjectManager.projectRoot, Path.Combine(buildDirectory, "_Resources/GameData"));
 
         // copy player pre build files
         SetStatus("Building player...");
@@ -112,7 +112,7 @@ public static class BuildWindow
 
     public static void BuildPlayer()
     {
-        string csproj = Path.GetFullPath("Resources/SourceForGameBuilding/Player/Player.csproj");
+        string csproj = Path.GetFullPath("_Resources/SourceForGameBuilding/Player/Player.csproj");
 
         string rid = "";
         if (platform == 0) rid = "win-x64";

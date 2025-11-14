@@ -19,7 +19,7 @@
 
   <!-- include resources the editor needs -->
   <ItemGroup>
-    <Content Include="Resources/**">
+    <Content Include="_Resources/**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -28,15 +28,15 @@
   <ItemGroup>
     <Content Include="../Shared/**" Exclude="../Shared/bin/**;../Shared/obj/**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>Resources/SourceForGameBuilding/Shared/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Link>_Resources/SourceForGameBuilding/Shared/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
     <Content Include="../Player/**" Exclude="../Player/bin/**;../Player/obj/**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>Resources/SourceForGameBuilding/Player/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Link>_Resources/SourceForGameBuilding/Player/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
     <Content Include="../Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>Resources/SourceForGameBuilding/Common.props</Link>
+      <Link>_Resources/SourceForGameBuilding/Common.props</Link>
     </Content>
   </ItemGroup>
 

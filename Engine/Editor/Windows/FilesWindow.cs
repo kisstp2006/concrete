@@ -148,7 +148,7 @@ public static unsafe class FilesWindow
                 if (ImGui.Button("Create"))
                 {                    
                     string path = MakeFileUnique(newScriptParentDirectory, newScriptName, ".cs");
-                    string template = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "NewScriptTemplate.cs"));
+                    string template = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "NewScriptTemplate.cs"));
                     string templateWithName = template.Replace("InsertScriptName", newScriptName);
                     File.WriteAllText(path, templateWithName);
                     AssetDatabase.Rebuild();
