@@ -7,6 +7,7 @@ using Silk.NET.Maths;
 using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
 using Silk.NET.GLFW;
+using Silk.NET.Windowing.Glfw;
 
 namespace Concrete;
 
@@ -16,6 +17,8 @@ public static unsafe class Editor
 
     static void Main()
     {
+        GlfwWindowing.Use();
+        
         var options = WindowOptions.Default;
         options.Size = new(1600, 900);
         options.Title = "Concrete Engine";
