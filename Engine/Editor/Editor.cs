@@ -6,6 +6,7 @@ using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
+using Silk.NET.GLFW;
 
 namespace Concrete;
 
@@ -30,6 +31,7 @@ public static unsafe class Editor
 
     static void StartWindow()
     {
+        NativeWindow.glfw = Glfw.GetApi();
         NativeWindow.opengl = GL.GetApi(NativeWindow.window);
         NativeWindow.input = NativeWindow.window.CreateInput();
         
@@ -39,7 +41,15 @@ public static unsafe class Editor
         EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "cascadia.ttf"), 14);
         EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "fontawesome_free_solid.otf"), 14, true);
         EditorStyleChanger.SetupCustomTheme();
-        ImGui.GetStyle().FontScaleDpi = DisplayScaling.displayScale;
+
+        // set imgui display scale based on glfw query
+        if (NativeWindow.window.Native.Glfw != null)
+        {
+            var monitor = NativeWindow.glfw.GetPrimaryMonitor();
+            NativeWindow.glfw.GetMonitorContentScale(monitor, out float xscale, out float yscale);
+            float displayScale = MathF.Max(xscale, yscale);
+            ImGui.GetStyle().FontScaleDpi = displayScale;
+        }
         
         ProjectManager.TryLoadLastProjectOrCreateTempProject();
     }
