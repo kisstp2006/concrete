@@ -10,7 +10,9 @@ public static class Player
 
     static void Main()
     {
-        platform = new Platform(new Vector2(1600, 900), "Concrete Player");
+        platform = new PlatformSDL3();
+
+        platform.Initialize(new Vector2(1600, 900), "Concrete Player");
 
         platform.SubscribeStart(StartWindow);
         platform.SubscribeUpdate(UpdateWindow);
@@ -35,16 +37,16 @@ public static class Player
 
     static void RenderWindow(float deltaTime)
     {
-        platform.opengl.Enable(EnableCap.DepthTest);
-        platform.opengl.Enable(EnableCap.Blend);
-        platform.opengl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-        platform.opengl.ClearColor(Scene.Current.FindCamera().clearColor);
-        platform.opengl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        platform.GetGL().Enable(EnableCap.DepthTest);
+        platform.GetGL().Enable(EnableCap.Blend);
+        platform.GetGL().BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+        platform.GetGL().ClearColor(Scene.Current.FindCamera().clearColor);
+        platform.GetGL().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         SceneManager.RenderSceneObjects(deltaTime, Scene.Current.FindCamera().view, Scene.Current.FindCamera().proj);
     }
 
     static void ResizeWindow(Vector2 size)
     {
-        platform.opengl.Viewport(new System.Drawing.Size((int)size.X, (int)size.Y));
+        platform.GetGL().Viewport(new System.Drawing.Size((int)size.X, (int)size.Y));
     }
 }

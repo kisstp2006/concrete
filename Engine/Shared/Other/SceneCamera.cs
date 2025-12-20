@@ -22,23 +22,23 @@ public class SceneCamera
     {
         // position
         var movedir = new Vector3();
-        if (Platform.current.IsKeyPressed(PlatformKey.W)) movedir += forward;
-        if (Platform.current.IsKeyPressed(PlatformKey.A)) movedir += right;
-        if (Platform.current.IsKeyPressed(PlatformKey.S)) movedir -= forward;
-        if (Platform.current.IsKeyPressed(PlatformKey.D)) movedir -= right;
-        if (Platform.current.IsKeyPressed(PlatformKey.Space)) movedir += up;
-        if (Platform.current.IsKeyPressed(PlatformKey.ControlLeft)) movedir -= up;
-        if (Platform.current.IsKeyPressed(PlatformKey.ShiftLeft)) movedir *= 2;
+        if (Platform.Current.IsKeyPressed(PlatformKey.W)) movedir += forward;
+        if (Platform.Current.IsKeyPressed(PlatformKey.A)) movedir += right;
+        if (Platform.Current.IsKeyPressed(PlatformKey.S)) movedir -= forward;
+        if (Platform.Current.IsKeyPressed(PlatformKey.D)) movedir -= right;
+        if (Platform.Current.IsKeyPressed(PlatformKey.Space)) movedir += up;
+        if (Platform.Current.IsKeyPressed(PlatformKey.ControlLeft)) movedir -= up;
+        if (Platform.Current.IsKeyPressed(PlatformKey.ShiftLeft)) movedir *= 2;
         position += movedir * deltaTime;
 
         // rotation
         var lookSpeed = 0.12f;
-        if (Platform.current.IsMouseButtonPressed(1))
+        if (Platform.Current.IsMouseButtonPressed(1))
         {
-            var mouseDelta = lastMousePos - Platform.current.GetMousePosition();
+            var mouseDelta = lastMousePos - Platform.Current.GetMousePosition();
             rotation += new Vector3(-mouseDelta.Y, mouseDelta.X, 0) * lookSpeed;
         }
-        lastMousePos = Platform.current.GetMousePosition();
+        lastMousePos = Platform.Current.GetMousePosition();
     }
 
     private Vector3 LocalDirection(Vector3 worldDirection)

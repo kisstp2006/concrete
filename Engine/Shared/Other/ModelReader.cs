@@ -89,15 +89,15 @@ public static class ModelReader
         is_image.CopyPixelDataTo(rawdata);
 
         // create texture
-        uint texture = Platform.current.opengl.GenTexture();
-        Platform.current.opengl.ActiveTexture(TextureUnit.Texture0 + unit);
-        Platform.current.opengl.BindTexture(GLEnum.Texture2D, texture);
-        Platform.current.opengl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
-        Platform.current.opengl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
-        Platform.current.opengl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.Nearest);
-        Platform.current.opengl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Nearest);
-        fixed (void* pointer = rawdata) Platform.current.opengl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)width, (uint)height, 0, PixelFormat.Rgba, GLEnum.UnsignedByte, pointer);
-        Platform.current.opengl.BindTexture(GLEnum.Texture2D, 0);
+        uint texture = Platform.Current.GetGL().GenTexture();
+        Platform.Current.GetGL().ActiveTexture(TextureUnit.Texture0 + unit);
+        Platform.Current.GetGL().BindTexture(GLEnum.Texture2D, texture);
+        Platform.Current.GetGL().TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
+        Platform.Current.GetGL().TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
+        Platform.Current.GetGL().TexParameter(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.Nearest);
+        Platform.Current.GetGL().TexParameter(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Nearest);
+        fixed (void* pointer = rawdata) Platform.Current.GetGL().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)width, (uint)height, 0, PixelFormat.Rgba, GLEnum.UnsignedByte, pointer);
+        Platform.Current.GetGL().BindTexture(GLEnum.Texture2D, 0);
 
         return texture;
     }

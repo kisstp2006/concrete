@@ -17,7 +17,9 @@ public static unsafe class Editor
 
     static void Main()
     {
-        platform = new Platform(new Vector2(1600, 900), "Concrete Player");
+        platform = new PlatformSDL3();
+
+        platform.Initialize(new Vector2(1600, 900), "Concrete Player");
 
         platform.SubscribeStart(StartWindow);
         platform.SubscribeUpdate(UpdateWindow);
@@ -25,8 +27,8 @@ public static unsafe class Editor
         platform.SubscribeResize(ResizeWindow);
         platform.SubscribeFileDrop(FileDrop);
         
-        // this only exists to couple the imgui backend with the sdl events
-        platform.SubscribeExtraSDLEvent((nint eventPtr) => ImGuiImplSDL3.ProcessEvent((SDLEvent*)eventPtr));
+        // sdl specific
+        ((PlatformSDL3)platform).SubscribeExtraSDLEvent((nint eventPtr) => ImGuiImplSDL3.ProcessEvent((SDLEvent*)eventPtr));
 
         platform.Run();
     }
@@ -47,7 +49,7 @@ public static unsafe class Editor
 
         // imgui backends
         ImGuiImplSDL3.SetCurrentContext(guiContext);
-        ImGuiImplSDL3.InitForOpenGL(new SDLWindowPtr((SDLWindow*)platform.window), (void*)platform.glContext.Handle);
+        ImGuiImplSDL3.InitForOpenGL(new SDLWindowPtr((SDLWindow*)((PlatformSDL3)platform).GetSDLWindowPtr), (void*)((PlatformSDL3)platform).GetSDLGLContext.Handle);
         ImGuiImplOpenGL3.SetCurrentContext(guiContext);
         ImGuiImplOpenGL3.Init((byte*)null);
 
@@ -72,11 +74,11 @@ public static unsafe class Editor
 
     static void RenderWindow(float deltaTime)
     {
-        platform.opengl.Enable(EnableCap.DepthTest);
-        platform.opengl.Enable(EnableCap.Blend);
-        platform.opengl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-        platform.opengl.ClearColor(Color.Black);
-        platform.opengl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        platform.GetGL().Enable(EnableCap.DepthTest);
+        platform.GetGL().Enable(EnableCap.Blend);
+        platform.GetGL().BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+        platform.GetGL().ClearColor(Color.Black);
+        platform.GetGL().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         ImGuiImplOpenGL3.NewFrame();
         ImGuiImplSDL3.NewFrame();
@@ -92,7 +94,7 @@ public static unsafe class Editor
 
     static void ResizeWindow(Vector2 size)
     {
-        platform.opengl.Viewport(new Size((int)size.X, (int)size.Y));
+        platform.GetGL().Viewport(new Size((int)size.X, (int)size.Y));
     }
 
     static void FileDrop(string[] paths)

@@ -5,7 +5,7 @@ namespace Concrete;
 
 public static unsafe class GridRenderer
 {
-    static GL opengl = Platform.current.opengl;
+    static GL opengl => Platform.Current.GetGL();
 
     static Shader shader = Shader.CreateGrid();
 
