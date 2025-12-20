@@ -28,8 +28,8 @@ public static unsafe class Editor
         platform.SubscribeResize(ResizeWindow);
         platform.SubscribeFileDrop(FileDrop);
         
-        // sdl specific
-        ((PlatformSDL3)platform).SubscribeExtraSDLEvent((nint eventPtr) => ImGuiImplSDL3.ProcessEvent((SDLEvent*)eventPtr));
+        // connect imgui sdl backend to sdl events
+        platform_sdl3.SubscribeExtraSDLEvent(eventPtr => ImGuiImplSDL3.ProcessEvent((SDLEvent*)eventPtr));
 
         platform.Run();
     }
