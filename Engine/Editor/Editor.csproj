@@ -28,6 +28,10 @@
 
   <!-- include the source code for building a player with the editor -->
   <ItemGroup>
+    <Content Include="../Platform/**" Exclude="../Platform/bin/**;../Platform/obj/**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>_Resources/SourceForGameBuilding/Platform/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
     <Content Include="../Shared/**" Exclude="../Shared/bin/**;../Shared/obj/**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>_Resources/SourceForGameBuilding/Shared/%(RecursiveDir)%(Filename)%(Extension)</Link>

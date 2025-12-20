@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../Common.props" />
+
+  <PropertyGroup>
+    <OutputType>library</OutputType>
+    <AssemblyName>Platform</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Silk.NET.OpenGL" Version="2.22.0" />
+    <PackageReference Include="Hexa.NET.SDL3" Version="1.2.16" />
+  </ItemGroup>
+
+</Project>
