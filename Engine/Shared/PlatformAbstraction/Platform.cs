@@ -1,78 +1,212 @@
-using Silk.NET.Input;
 using Silk.NET.OpenGL;
-using Silk.NET.GLFW;
-using Silk.NET.Windowing;
-using Silk.NET.Windowing.Glfw;
-
+using Hexa.NET.SDL3;
 using System.Numerics;
 
 namespace Concrete;
 
-public class Platform
+public unsafe class Platform
 {
     public static Platform current = null;
 
     public GL opengl;
-    private IInputContext input;
-    private IWindow window;
-    private Glfw glfw;
 
-    // only needed for an edge case
-    public IWindow GetSilkWindowReference() => window;
-    public IInputContext GetSilkInputReference() => input;
+    public SDLWindow* window;
+    public SDLGLContext glContext;
+
+    // callbacks
+    private Action startCallback;
+    private Action<float> updateCallback;
+    private Action<float> renderCallback;
+    private Action<Vector2> resizeCallback;
+    private Action<string[]> fileDropCallback;
+
+    // sdl specific
+    private Action<nint> SDLEventCallbacks;
+
+    // Input state
+    private bool[] keyStates = new bool[512];
+    private bool[] mouseButtonStates = new bool[8];
+    private Vector2 mousePosition;
+
+    private string[] pendingDroppedFiles = null;
+
+    // Timing
+    private ulong lastTime;
+    private bool isRunning;
 
     public Platform(Vector2 windowSize, string windowTitle)
     {
         // make this platform the current active one
         current ??= this;
 
-        // make silk prioritize glfw
-        GlfwWindowing.Use();
+        // Initialize SDL
+        SDL.Init(SDLInitFlags.Video | SDLInitFlags.Events);
 
-        // create silk window
-        var options = WindowOptions.Default;
-        options.Size = new((int)windowSize.X, (int)windowSize.Y);
-        options.Title = windowTitle;
-        window = Window.Create(options);
+        // Set OpenGL attributes
+        SDL.GLSetAttribute(SDLGLAttr.ContextMajorVersion, 3);
+        SDL.GLSetAttribute(SDLGLAttr.ContextMinorVersion, 3);
+        SDL.GLSetAttribute(SDLGLAttr.ContextProfileMask, SDL.SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL.GLSetAttribute(SDLGLAttr.Doublebuffer, 1);
+
+        // Create window
+        window = SDL.CreateWindow(
+            windowTitle,
+            (int)windowSize.X,
+            (int)windowSize.Y,
+            SDLWindowFlags.Opengl | SDLWindowFlags.Resizable
+        );
+
+        // Create OpenGL context
+        glContext = SDL.GLCreateContext(window);
+        SDL.GLMakeCurrent(window, glContext);
+        SDL.GLSetSwapInterval(1);
+
+        lastTime = SDL.GetPerformanceCounter();
     }
 
     public void Run()
     {
-        window.Run();
-        window.Dispose();
+        // Call start callback
+        opengl = GL.GetApi((name) => (nint)SDL.GLGetProcAddress(name));
+        startCallback?.Invoke();
+
+        isRunning = true;
+
+        while (isRunning)
+        {
+            // Calculate delta time
+            ulong currentTime = SDL.GetPerformanceCounter();
+            float deltaTime = (currentTime - lastTime) / (float)SDL.GetPerformanceFrequency();
+            lastTime = currentTime;
+
+            // Process events
+            ProcessSDLEvents();
+
+            // Update
+            updateCallback?.Invoke(deltaTime);
+
+            // Render
+            renderCallback?.Invoke(deltaTime);
+
+            // File Drop
+            if (pendingDroppedFiles != null)
+            {
+                fileDropCallback?.Invoke(pendingDroppedFiles);
+                pendingDroppedFiles = null;
+            }
+
+            // Swap buffers
+            SDL.GLSwapWindow(window);
+        }
+
+        // Cleanup
+        SDL.GLDestroyContext(glContext);
+        SDL.DestroyWindow(window);
+        SDL.Quit();
+    }
+
+    private void ProcessSDLEvents()
+    {
+        var MapSDLMouseButton = (byte sdlButton) =>
+        {
+            if (sdlButton == 1) return 0;
+            if (sdlButton == 3) return 1;
+            if (sdlButton == 2) return 2;
+            else return -1;
+        };
+
+        SDLEvent sdlEvent;
+        while (SDL.PollEvent(&sdlEvent) != false)
+        {
+            SDLEventCallbacks?.Invoke((nint)(&sdlEvent));
+
+            var eventType = (SDLEventType)sdlEvent.Type;
+
+            if (eventType == SDLEventType.Quit)
+            {
+                isRunning = false;
+            }
+            else if (eventType == SDLEventType.WindowResized)
+            {
+                int width, height;
+                SDL.GetWindowSize(window, &width, &height);
+                resizeCallback?.Invoke(new Vector2(width, height));
+            }
+            else if (eventType == SDLEventType.KeyDown)
+            {
+                if ((int)sdlEvent.Key.Scancode < keyStates.Length)
+                {
+                    keyStates[(int)sdlEvent.Key.Scancode] = true;
+                }
+            }
+            else if (eventType == SDLEventType.KeyUp)
+            {
+                if ((int)sdlEvent.Key.Scancode < keyStates.Length)
+                {
+                    keyStates[(int)sdlEvent.Key.Scancode] = false;
+                }
+            }
+            else if (eventType == SDLEventType.MouseButtonDown)
+            {
+                int mappedButton = MapSDLMouseButton(sdlEvent.Button.Button);
+                if (mappedButton >= 0 && mappedButton < mouseButtonStates.Length)
+                {
+                    mouseButtonStates[mappedButton] = true;
+                }
+            }
+            else if (eventType == SDLEventType.MouseButtonUp)
+            {
+                int mappedButton = MapSDLMouseButton(sdlEvent.Button.Button);
+                if (mappedButton >= 0 && mappedButton < mouseButtonStates.Length)
+                {
+                    mouseButtonStates[mappedButton] = false;
+                }
+            }
+            else if (eventType == SDLEventType.MouseMotion)
+            {
+                mousePosition = new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y);
+            }
+            else if (eventType == SDLEventType.DropFile)
+            {
+                if (fileDropCallback != null)
+                {
+                    var path = new String((sbyte*)sdlEvent.Drop.Data);
+                    pendingDroppedFiles = [path];
+                }
+            }
+        }
     }
 
     #region Callbacks
 
     public void SubscribeStart(Action action)
     {
-        window.Load += () =>
-        {
-            opengl = GL.GetApi(window);
-            input = window.CreateInput();
-            glfw = Glfw.GetApi();
-            action();
-        };
+        startCallback = action;
     }
 
     public void SubscribeUpdate(Action<float> action)
     {
-        window.Update += (delta) => action((float)delta);
+        updateCallback = action;
     }
 
     public void SubscribeRender(Action<float> action)
     {
-        window.Render += (delta) => action((float)delta);
+        renderCallback = action;
     }
 
     public void SubscribeResize(Action<Vector2> action)
     {
-        window.Resize += (size) => action(new Vector2(size.X, size.Y));
+        resizeCallback = action;
     }
 
     public void SubscribeFileDrop(Action<string[]> action)
     {
-        window.FileDrop += (paths) => action(paths);
+        fileDropCallback = action;
+    }
+
+    public void SubscribeExtraSDLEvent(Action<nint> action) // this is sdl specific, platform doesnt require this
+    {
+        SDLEventCallbacks += action;
     }
 
     #endregion
@@ -81,46 +215,41 @@ public class Platform
 
     public bool IsKeyPressed(PlatformKey platformKey)
     {
-        return input.Keyboards[0].IsKeyPressed((Silk.NET.Input.Key)platformKey);
+        var sdlKey = PlatformKeyToNative.MapToSDLKey(platformKey);
+        return sdlKey < keyStates.Length && keyStates[sdlKey];
     }
 
     public bool IsMouseButtonPressed(int button)
     {
-        return input.Mice[0].IsButtonPressed((Silk.NET.Input.MouseButton)button);
+        return button >= 0 && button < mouseButtonStates.Length && mouseButtonStates[button];
     }
 
     public Vector2 GetMousePosition()
     {
-        return input.Mice[0].Position;
+        return mousePosition;
     }
 
     #endregion
 
     #region Other
 
-    public unsafe float GetDisplayScalingFactor()
+    public float GetDisplayScalingFactor()
     {
-        float displayScale = 1.0f;
-
-        if (window.Native.Glfw != null)
-        {
-            var monitor = glfw.GetPrimaryMonitor();
-            glfw.GetMonitorContentScale(monitor, out float xscale, out float yscale);
-            displayScale = MathF.Max(xscale, yscale);
-        }
-
-        return displayScale;
+        uint displayId = SDL.GetPrimaryDisplay();
+        float scale = SDL.GetDisplayContentScale(displayId);
+        return scale;
     }
 
     public Vector2 GetWindowSize()
     {
-        var size = new Vector2(window.Size.X, window.Size.Y);
-        return size;
+        int width, height;
+        SDL.GetWindowSize(window, &width, &height);
+        return new Vector2(width, height);
     }
 
     public void SetWindowTitle(string title)
     {
-        window.Title = title;
+        SDL.SetWindowTitle(window, title);
     }
 
     #endregion

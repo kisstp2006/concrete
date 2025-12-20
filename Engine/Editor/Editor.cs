@@ -2,6 +2,10 @@ using System.Drawing;
 using System.Numerics;
 
 using Hexa.NET.ImGui;
+using Hexa.NET.ImGui.Backends.OpenGL3;
+using Hexa.NET.ImGui.Backends.SDL3;
+using Hexa.NET.ImGuizmo;
+using Hexa.NET.ImPlot;
 
 using Silk.NET.OpenGL;
 
@@ -9,7 +13,6 @@ namespace Concrete;
 
 public static unsafe class Editor
 {
-    public static ImGuiController igcontroller;
     static Platform platform;
 
     static void Main()
@@ -21,21 +24,43 @@ public static unsafe class Editor
         platform.SubscribeRender(RenderWindow);
         platform.SubscribeResize(ResizeWindow);
         platform.SubscribeFileDrop(FileDrop);
+        
+        // this only exists to couple the imgui backend with the sdl events
+        platform.SubscribeExtraSDLEvent((nint eventPtr) => ImGuiImplSDL3.ProcessEvent((SDLEvent*)eventPtr));
 
         platform.Run();
     }
 
     static void StartWindow()
     {
+        // imgui contexts
+        var guiContext = ImGui.CreateContext();
+        var plotContext = ImPlot.CreateContext();
+        ImGui.SetCurrentContext(guiContext);
+        ImGuizmo.SetImGuiContext(guiContext);
+        ImPlot.SetImGuiContext(guiContext);
+        ImPlot.SetCurrentContext(plotContext);
+
+        // imgui flags
+        ImGui.GetIO().ConfigFlags = ImGuiConfigFlags.DockingEnable;
+        ImGui.GetIO().Handle->IniFilename = null;
+
+        // imgui backends
+        ImGuiImplSDL3.SetCurrentContext(guiContext);
+        ImGuiImplSDL3.InitForOpenGL(new SDLWindowPtr((SDLWindow*)platform.window), (void*)platform.glContext.Handle);
+        ImGuiImplOpenGL3.SetCurrentContext(guiContext);
+        ImGuiImplOpenGL3.Init((byte*)null);
+
         // setup imgui controller and styling
-        igcontroller = new ImGuiController(platform.opengl, platform.GetSilkWindowReference(), platform.GetSilkInputReference());
         EditorStyleChanger.ClearFonts();
         EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "cascadia.ttf"), 14);
         EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "fontawesome_free_solid.otf"), 14, true);
         EditorStyleChanger.SetupCustomTheme();
-
+        
+        // imgui display scaling
         ImGui.GetStyle().FontScaleDpi = platform.GetDisplayScalingFactor();
         
+        // load concrete project
         ProjectManager.TryLoadLastProjectOrCreateTempProject();
     }
 
@@ -43,7 +68,6 @@ public static unsafe class Editor
     {
         Metrics.Update(deltaTime);
         if (SceneManager.playState == PlayState.playing) SceneManager.UpdateSceneObjects(deltaTime);
-        igcontroller.Update(deltaTime);
     }
 
     static void RenderWindow(float deltaTime)
@@ -53,8 +77,17 @@ public static unsafe class Editor
         platform.opengl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
         platform.opengl.ClearColor(Color.Black);
         platform.opengl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+        ImGuiImplOpenGL3.NewFrame();
+        ImGuiImplSDL3.NewFrame();
+        ImGui.NewFrame();
+        ImGuizmo.BeginFrame();
+
         Render(deltaTime);
-        igcontroller.Render();
+
+        ImGui.Render();
+        ImGui.EndFrame();
+        ImGuiImplOpenGL3.RenderDrawData(ImGui.GetDrawData());
     }
 
     static void ResizeWindow(Vector2 size)
@@ -64,6 +97,7 @@ public static unsafe class Editor
 
     static void FileDrop(string[] paths)
     {
+        Debug.Log(FilesWindow.hovered.ToString());
         if (!FilesWindow.hovered) return;
         foreach (var path in paths)
         {
