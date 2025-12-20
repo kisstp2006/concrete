@@ -14,6 +14,7 @@ namespace Concrete;
 public static unsafe class Editor
 {
     static Platform platform;
+    static PlatformSDL3 platform_sdl3 => platform as PlatformSDL3;
 
     static void Main()
     {
@@ -49,7 +50,7 @@ public static unsafe class Editor
 
         // imgui backends
         ImGuiImplSDL3.SetCurrentContext(guiContext);
-        ImGuiImplSDL3.InitForOpenGL(new SDLWindowPtr((SDLWindow*)((PlatformSDL3)platform).GetSDLWindowPtr), (void*)((PlatformSDL3)platform).GetSDLGLContext.Handle);
+        ImGuiImplSDL3.InitForOpenGL(new((SDLWindow*)platform_sdl3.Get_SDL_Window_Ptr()), (void*)platform_sdl3.Get_SDL_GLContext_Ptr());
         ImGuiImplOpenGL3.SetCurrentContext(guiContext);
         ImGuiImplOpenGL3.Init((byte*)null);
 

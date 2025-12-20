@@ -225,13 +225,11 @@ public unsafe class PlatformSDL3 : Platform
 
     #region SDL_Specific_Publics
 
-    public SDLWindow* GetSDLWindowPtr => window;
-    public SDLGLContext GetSDLGLContext => glContext;
+    public nint Get_SDL_Window_Ptr() => (nint)window;
 
-    public void SubscribeExtraSDLEvent(Action<nint> action) // this is sdl specific, platform doesnt require this
-    {
-        SDLEventCallbacks += action;
-    }
+    public nint Get_SDL_GLContext_Ptr() => glContext.Handle;
+
+    public void SubscribeExtraSDLEvent(Action<nint> action) => SDLEventCallbacks += action;
 
     #endregion
 
