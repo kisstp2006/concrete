@@ -1,5 +1,4 @@
 using System.Numerics;
-using Silk.NET.Input;
 
 namespace Concrete;
 
@@ -21,28 +20,25 @@ public class SceneCamera
 
     public void ApplyMovement(float deltaTime)
     {
-        var keyboard = NativeWindow.input.Keyboards[0];
-        var mouse = NativeWindow.input.Mice[0];
-
         // position
         var movedir = new Vector3();
-        if (keyboard.IsKeyPressed(Key.W)) movedir += forward;
-        if (keyboard.IsKeyPressed(Key.A)) movedir += right;
-        if (keyboard.IsKeyPressed(Key.S)) movedir -= forward;
-        if (keyboard.IsKeyPressed(Key.D)) movedir -= right;
-        if (keyboard.IsKeyPressed(Key.Space)) movedir += up;
-        if (keyboard.IsKeyPressed(Key.ControlLeft)) movedir -= up;
-        if (keyboard.IsKeyPressed(Key.ShiftLeft)) movedir *= 2;
+        if (Platform.current.IsKeyPressed(PlatformKey.W)) movedir += forward;
+        if (Platform.current.IsKeyPressed(PlatformKey.A)) movedir += right;
+        if (Platform.current.IsKeyPressed(PlatformKey.S)) movedir -= forward;
+        if (Platform.current.IsKeyPressed(PlatformKey.D)) movedir -= right;
+        if (Platform.current.IsKeyPressed(PlatformKey.Space)) movedir += up;
+        if (Platform.current.IsKeyPressed(PlatformKey.ControlLeft)) movedir -= up;
+        if (Platform.current.IsKeyPressed(PlatformKey.ShiftLeft)) movedir *= 2;
         position += movedir * deltaTime;
 
         // rotation
         var lookSpeed = 0.12f;
-        if (mouse.IsButtonPressed(MouseButton.Right))
+        if (Platform.current.IsMouseButtonPressed(1))
         {
-            var mouseDelta = lastMousePos - mouse.Position;
+            var mouseDelta = lastMousePos - Platform.current.GetMousePosition();
             rotation += new Vector3(-mouseDelta.Y, mouseDelta.X, 0) * lookSpeed;
         }
-        lastMousePos = mouse.Position;
+        lastMousePos = Platform.current.GetMousePosition();
     }
 
     private Vector3 LocalDirection(Vector3 worldDirection)

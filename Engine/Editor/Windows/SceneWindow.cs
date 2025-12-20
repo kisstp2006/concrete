@@ -47,7 +47,7 @@ public static unsafe class SceneWindow
             var position = ImGui.GetWindowPos();
             var size = ImGui.GetWindowSize();
             var rect = new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y);
-            NativeWindow.opengl.Viewport(rect);
+            Platform.current.opengl.Viewport(rect);
 
             ImGuizmo.SetDrawlist();
             ImGuizmo.SetRect(position.X, position.Y, size.X, size.Y);
@@ -60,7 +60,7 @@ public static unsafe class SceneWindow
             ImGuizmo.Manipulate(ref sview, ref sproj, guizmoOperation, guizmoMode, ref worldModelMatrix);
             if (ImGuizmo.IsUsing()) HierarchyWindow.selectedGameObject.transform.SetWorldModelMatrix(worldModelMatrix);
 
-            NativeWindow.opengl.Viewport(NativeWindow.window.Size);
+            Platform.current.opengl.Viewport(new Size((int)Platform.current.GetWindowSize().X, (int)Platform.current.GetWindowSize().Y));
         }
 
         {

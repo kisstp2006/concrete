@@ -1,55 +1,50 @@
 using System.Reflection;
-using Silk.NET.Input;
-using Silk.NET.Maths;
+using System.Numerics;
 using Silk.NET.OpenGL;
-using Silk.NET.Windowing;
 
 namespace Concrete;
 
 public static class Player
 {
+    static Platform platform;
+
     static void Main()
     {
-        var options = WindowOptions.Default;
-        options.Size = new(1600, 900);
-        options.Title = "Concrete Player";
-        NativeWindow.window = Window.Create(options);
-        NativeWindow.window.Load += StartWindow;
-        NativeWindow.window.Update += UpdateWindow;
-        NativeWindow.window.Render += RenderWindow;
-        NativeWindow.window.FramebufferResize += ResizeWindow;
-        NativeWindow.window.Run();
-        NativeWindow.window.Dispose();
+        platform = new Platform(new Vector2(1600, 900), "Concrete Player");
+
+        platform.SubscribeStart(StartWindow);
+        platform.SubscribeUpdate(UpdateWindow);
+        platform.SubscribeRender(RenderWindow);
+        platform.SubscribeResize(ResizeWindow);
+
+        platform.Run();
     }
 
     static void StartWindow()
     {
-        NativeWindow.opengl = GL.GetApi(NativeWindow.window);
-        NativeWindow.input = NativeWindow.window.CreateInput();
-        
         Assembly.LoadFile(Path.GetFullPath("Scripts.dll"));
         ProjectManager.LoadProjectFile("./_Resources/GameData/project.json");
         SceneManager.StartPlaying();
     }
 
-    static void UpdateWindow(double deltaTime)
+    static void UpdateWindow(float deltaTime)
     {
-        Metrics.Update((float)deltaTime);
-        if (SceneManager.playState == PlayState.playing) SceneManager.UpdateSceneObjects((float)deltaTime);
+        Metrics.Update(deltaTime);
+        if (SceneManager.playState == PlayState.playing) SceneManager.UpdateSceneObjects(deltaTime);
     }
 
-    static void RenderWindow(double deltaTime)
+    static void RenderWindow(float deltaTime)
     {
-        NativeWindow.opengl.Enable(EnableCap.DepthTest);
-        NativeWindow.opengl.Enable(EnableCap.Blend);
-        NativeWindow.opengl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-        NativeWindow.opengl.ClearColor(Scene.Current.FindCamera().clearColor);
-        NativeWindow.opengl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-        SceneManager.RenderSceneObjects((float)deltaTime, Scene.Current.FindCamera().view, Scene.Current.FindCamera().proj);
+        platform.opengl.Enable(EnableCap.DepthTest);
+        platform.opengl.Enable(EnableCap.Blend);
+        platform.opengl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+        platform.opengl.ClearColor(Scene.Current.FindCamera().clearColor);
+        platform.opengl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        SceneManager.RenderSceneObjects(deltaTime, Scene.Current.FindCamera().view, Scene.Current.FindCamera().proj);
     }
 
-    static void ResizeWindow(Vector2D<int> size)
+    static void ResizeWindow(Vector2 size)
     {
-        NativeWindow.opengl.Viewport(size);
+        platform.opengl.Viewport(new System.Drawing.Size((int)size.X, (int)size.Y));
     }
 }

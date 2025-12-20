@@ -1,83 +1,65 @@
 using System.Drawing;
+using System.Numerics;
 
 using Hexa.NET.ImGui;
 
-using Silk.NET.Input;
-using Silk.NET.Maths;
-using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
-using Silk.NET.GLFW;
-using Silk.NET.Windowing.Glfw;
 
 namespace Concrete;
 
 public static unsafe class Editor
 {
     public static ImGuiController igcontroller;
+    static Platform platform;
 
     static void Main()
     {
-        GlfwWindowing.Use();
-        
-        var options = WindowOptions.Default;
-        options.Size = new(1600, 900);
-        options.Title = "Concrete Engine";
-        NativeWindow.window = Window.Create(options);
-        NativeWindow.window.Load += StartWindow;
-        NativeWindow.window.Update += UpdateWindow;
-        NativeWindow.window.Render += RenderWindow;
-        NativeWindow.window.FramebufferResize += ResizeWindow;
-        NativeWindow.window.FileDrop += FileDrop;
-        NativeWindow.window.Run();
-        NativeWindow.window.Dispose();
+        platform = new Platform(new Vector2(1600, 900), "Concrete Player");
+
+        platform.SubscribeStart(StartWindow);
+        platform.SubscribeUpdate(UpdateWindow);
+        platform.SubscribeRender(RenderWindow);
+        platform.SubscribeResize(ResizeWindow);
+        platform.SubscribeFileDrop(FileDrop);
+
+        platform.Run();
     }
 
     static void StartWindow()
     {
-        NativeWindow.glfw = Glfw.GetApi();
-        NativeWindow.opengl = GL.GetApi(NativeWindow.window);
-        NativeWindow.input = NativeWindow.window.CreateInput();
-        
         // setup imgui controller and styling
-        igcontroller = new ImGuiController(NativeWindow.opengl, NativeWindow.window, NativeWindow.input);
+        igcontroller = new ImGuiController(platform.opengl, platform.GetSilkWindowReference(), platform.GetSilkInputReference());
         EditorStyleChanger.ClearFonts();
         EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "cascadia.ttf"), 14);
         EditorStyleChanger.AddFont(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_Resources", "fontawesome_free_solid.otf"), 14, true);
         EditorStyleChanger.SetupCustomTheme();
 
-        // set imgui display scale based on glfw query
-        if (NativeWindow.window.Native.Glfw != null)
-        {
-            var monitor = NativeWindow.glfw.GetPrimaryMonitor();
-            NativeWindow.glfw.GetMonitorContentScale(monitor, out float xscale, out float yscale);
-            float displayScale = MathF.Max(xscale, yscale);
-            ImGui.GetStyle().FontScaleDpi = displayScale;
-        }
+        ImGui.GetStyle().FontScaleDpi = platform.GetDisplayScalingFactor();
         
         ProjectManager.TryLoadLastProjectOrCreateTempProject();
     }
 
-    static void UpdateWindow(double deltaTime)
+    static void UpdateWindow(float deltaTime)
     {
-        Metrics.Update((float)deltaTime);
-        if (SceneManager.playState == PlayState.playing) SceneManager.UpdateSceneObjects((float)deltaTime);
-        igcontroller.Update((float)deltaTime);
+        Metrics.Update(deltaTime);
+        if (SceneManager.playState == PlayState.playing) SceneManager.UpdateSceneObjects(deltaTime);
+        igcontroller.Update(deltaTime);
     }
 
-    static void RenderWindow(double deltaTime)
+    static void RenderWindow(float deltaTime)
     {
-        NativeWindow.opengl.Enable(EnableCap.DepthTest);
-        NativeWindow.opengl.Enable(EnableCap.Blend);
-        NativeWindow.opengl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-        NativeWindow.opengl.ClearColor(Color.Black);
-        NativeWindow.opengl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-        Render((float)deltaTime);
+        platform.opengl.Enable(EnableCap.DepthTest);
+        platform.opengl.Enable(EnableCap.Blend);
+        platform.opengl.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+        platform.opengl.ClearColor(Color.Black);
+        platform.opengl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        Render(deltaTime);
         igcontroller.Render();
     }
 
-    static void ResizeWindow(Vector2D<int> size)
+    static void ResizeWindow(Vector2 size)
     {
-        NativeWindow.opengl.Viewport(size);
+        platform.opengl.Viewport(new Size((int)size.X, (int)size.Y));
     }
 
     static void FileDrop(string[] paths)
@@ -133,7 +115,7 @@ public static unsafe class Editor
         BuildWindow.Draw(deltaTime);
     }
 
-    unsafe private static void SetupDockSpace()
+    private static void SetupDockSpace()
     {
         uint dockspace = ImGui.DockSpaceOverViewport((ImGuiDockNodeFlags)ImGuiDockNodeFlagsPrivate.NoWindowMenuButton);
         if (!dockbuilderInitialized)

@@ -15,8 +15,8 @@ public unsafe class Framebuffer
 
     public Framebuffer()
     {
-        opengl = NativeWindow.opengl;
-        size = new Vector2(NativeWindow.window.Size.X, NativeWindow.window.Size.Y);
+        opengl = Platform.current.opengl;
+        size = Platform.current.GetWindowSize();
         handle = opengl.GenFramebuffer();
         opengl.BindFramebuffer(GLEnum.Framebuffer, handle);
 
@@ -54,7 +54,7 @@ public unsafe class Framebuffer
     public void Unbind()
     {
         opengl.BindFramebuffer(GLEnum.Framebuffer, 0);
-        opengl.Viewport(NativeWindow.window.Size);
+        opengl.Viewport(new Size((int)Platform.current.GetWindowSize().X, (int)Platform.current.GetWindowSize().Y));
     }
 
     public void Resize(Vector2 newSize)
