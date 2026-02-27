@@ -17,6 +17,8 @@ public static class BuildWindow
     private static int platform = 0;
     private static string[] availablePlatforms = ["Windows x64", "Linux x64"];
 
+    private static bool selfContained = true;
+
     private static bool hasDotnetSdkInstalled = Shell.IsCommandInPath("dotnet");
 
     public static void Draw(float deltaTime)
@@ -62,6 +64,12 @@ public static class BuildWindow
             }
             ImGui.EndCombo();
         }
+
+        ImGui.Text("Self Contained:");
+
+        ImGui.SameLine();
+
+        ImGui.Checkbox("##selfcontained", ref selfContained);
 
         ImGui.BeginDisabled(!Directory.Exists(buildDirectory));
         if (ImGui.Button("Start Building")) StartBuildingAsync();
@@ -118,7 +126,10 @@ public static class BuildWindow
         if (platform == 0) rid = "win-x64";
         if (platform == 1) rid = "linux-x64";
 
-        string args = $"publish {csproj} -o {buildDirectory} -r {rid} -c release";
+        string sc = "";
+        sc = selfContained ? "true" : "false";
+
+        string args = $"publish {csproj} -o {buildDirectory} -r {rid} -c release --sc {sc}";
 
         Shell.Run("dotnet", args, out string output, out string errors);
 
