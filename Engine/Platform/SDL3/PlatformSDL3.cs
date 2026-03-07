@@ -1,5 +1,5 @@
 using Silk.NET.OpenGL;
-using Hexa.NET.SDL3;
+using SDL3;
 using System.Numerics;
 
 namespace Concrete;
@@ -8,8 +8,8 @@ public unsafe class PlatformSDL3 : Platform
 {
     private GL opengl = null;
 
-    private SDLWindow* window;
-    private SDLGLContext glContext;
+    private nint window;
+    private nint glContext;
 
     private Action startCallback;
     private Action<float> updateCallback;
@@ -36,38 +36,37 @@ public unsafe class PlatformSDL3 : Platform
             else return -1;
         };
 
-        SDLEvent sdlEvent;
-        while (SDL.PollEvent(&sdlEvent) != false)
+        SDL.Event sdlEvent;
+        while (SDL.PollEvent(out sdlEvent) != false)
         {
             SDLEventCallbacks?.Invoke((nint)(&sdlEvent));
 
-            var eventType = (SDLEventType)sdlEvent.Type;
+            var eventType = (SDL.EventType)sdlEvent.Type;
 
-            if (eventType == SDLEventType.Quit)
+            if (eventType == SDL.EventType.Quit)
             {
                 isRunning = false;
             }
-            else if (eventType == SDLEventType.WindowResized)
+            else if (eventType == SDL.EventType.WindowResized)
             {
-                int width, height;
-                SDL.GetWindowSize(window, &width, &height);
+                SDL.GetWindowSize(window, out int width, out int height);
                 resizeCallback?.Invoke(new Vector2(width, height));
             }
-            else if (eventType == SDLEventType.KeyDown)
+            else if (eventType == SDL.EventType.KeyDown)
             {
                 if ((int)sdlEvent.Key.Scancode < keyStates.Length)
                 {
                     keyStates[(int)sdlEvent.Key.Scancode] = true;
                 }
             }
-            else if (eventType == SDLEventType.KeyUp)
+            else if (eventType == SDL.EventType.KeyUp)
             {
                 if ((int)sdlEvent.Key.Scancode < keyStates.Length)
                 {
                     keyStates[(int)sdlEvent.Key.Scancode] = false;
                 }
             }
-            else if (eventType == SDLEventType.MouseButtonDown)
+            else if (eventType == SDL.EventType.MouseButtonDown)
             {
                 int mappedButton = MapSDLMouseButton(sdlEvent.Button.Button);
                 if (mappedButton >= 0 && mappedButton < mouseButtonStates.Length)
@@ -75,7 +74,7 @@ public unsafe class PlatformSDL3 : Platform
                     mouseButtonStates[mappedButton] = true;
                 }
             }
-            else if (eventType == SDLEventType.MouseButtonUp)
+            else if (eventType == SDL.EventType.MouseButtonUp)
             {
                 int mappedButton = MapSDLMouseButton(sdlEvent.Button.Button);
                 if (mappedButton >= 0 && mappedButton < mouseButtonStates.Length)
@@ -83,11 +82,11 @@ public unsafe class PlatformSDL3 : Platform
                     mouseButtonStates[mappedButton] = false;
                 }
             }
-            else if (eventType == SDLEventType.MouseMotion)
+            else if (eventType == SDL.EventType.MouseMotion)
             {
                 mousePosition = new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y);
             }
-            else if (eventType == SDLEventType.DropFile)
+            else if (eventType == SDL.EventType.DropFile)
             {
                 if (fileDropCallback != null)
                 {
@@ -225,9 +224,9 @@ public unsafe class PlatformSDL3 : Platform
 
     #region SDL_Specific_Publics
 
-    public nint Get_SDL_Window_Ptr() => (nint)window;
+    public nint Get_SDL_Window_Ptr() => window;
 
-    public nint Get_SDL_GLContext_Ptr() => glContext.Handle;
+    public nint Get_SDL_GLContext_Ptr() => glContext;
 
     public void SubscribeExtraSDLEvent(Action<nint> action) => SDLEventCallbacks += action;
 
@@ -247,20 +246,20 @@ public unsafe class PlatformSDL3 : Platform
         Current ??= this;
 
         // Initialize SDL
-        SDL.Init(SDLInitFlags.Video | SDLInitFlags.Events);
+        SDL.Init(SDL.InitFlags.Video | SDL.InitFlags.Events);
 
         // Set OpenGL attributes
-        SDL.GLSetAttribute(SDLGLAttr.ContextMajorVersion, 3);
-        SDL.GLSetAttribute(SDLGLAttr.ContextMinorVersion, 3);
-        SDL.GLSetAttribute(SDLGLAttr.ContextProfileMask, SDL.SDL_GL_CONTEXT_PROFILE_CORE);
-        SDL.GLSetAttribute(SDLGLAttr.Doublebuffer, 1);
+        SDL.GLSetAttribute(SDL.GLAttr.ContextMajorVersion, 3);
+        SDL.GLSetAttribute(SDL.GLAttr.ContextMinorVersion, 3);
+        SDL.GLSetAttribute(SDL.GLAttr.ContextProfileMask, (int)ContextProfileMask.CoreProfileBit);
+        SDL.GLSetAttribute(SDL.GLAttr.DoubleBuffer, 1);
 
         // Create window
         window = SDL.CreateWindow(
             windowTitle,
             (int)windowSize.X,
             (int)windowSize.Y,
-            SDLWindowFlags.Opengl | SDLWindowFlags.Resizable
+            SDL.WindowFlags.OpenGL | SDL.WindowFlags.Resizable
         );
 
         // Create OpenGL context
@@ -362,8 +361,7 @@ public unsafe class PlatformSDL3 : Platform
 
     override public Vector2 GetWindowSize()
     {
-        int width, height;
-        SDL.GetWindowSize(window, &width, &height);
+        SDL.GetWindowSize(window, out int width, out int height);
         return new Vector2(width, height);
     }
 
