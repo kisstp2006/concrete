@@ -88,19 +88,3 @@ public class Mesh
         return list.ToArray();
     }
 }
-
-public struct Vertex
-{
-    public Vector3 position;
-    public Vector3 normal;
-    public Vector2 uv;
-    public Vector4 joints;
-    public Vector4 weights;
-}
-
-public class Material
-{
-    public Vector4 color = Vector4.One;
-    public uint? albedoTexture = null;
-    public uint? roughnessTexture = null;
-}
